@@ -1,0 +1,64 @@
+<div id="test"></div>
+<script id="template" type="text/x-handlebars-template"> 
+{{#each this}}
+
+<hr/>
+
+
+<div id="table">
+	<table>
+	<tr>
+		<td>
+			<div id="steps" style="color: #000000; font-size:36px;">  {{steps}}
+</div><br></td>
+		</td>
+	</tr>
+
+	
+</table>
+</div>
+{{/each}}
+</script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script
+	src="http://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.0/mustache.min.js"></script>
+<script type="text/javascript"
+	src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js"></script>
+<script>
+	$(document)
+			.ready(
+					function() {
+						
+						var source = $("#template").html();
+						var template = Handlebars.compile(source);
+						
+						var rdata = [ {
+							"totalSteps" : 100,
+							"name" : "Dummy",
+							"heightFeet" : 5,
+							"averageSteps" : 10,
+						}, {
+							"totalSteps" : 10000,
+							"name" : "TestMan",
+							"heightFeet" : 4,
+							"averageSteps" : 10,
+						} ];
+						
+						Handlebars.registerHelper('steps', function() {
+							return this.totalSteps.toLocaleString();
+						});
+						var ht = template(rdata);
+					
+						$("#test").html(ht);
+						
+						$("#steps").each(function (index) {
+							return rdata[index].heightFeet;
+						});
+						
+					
+
+		});
+
+</script>

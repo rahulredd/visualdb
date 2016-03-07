@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="project.css">
+</head>
+
+ <div id="options"> 
+<select id="top10">
+ 	  <option value=""></option>
+      <option value="riversChart">Longest Rivers</option>
+      <option value="altituderivers">Altitude of the River's Source</option>
+    </select>
+ </div>
+<div class = "altituderivers"></div>
+<div class = "riversChart"></div>
+</body>
+<style>
+.riversChart div {
+	font: 10px sans-serif;
+	text-align: right;
+	padding: 20px;
+	margin: 1px;
+	color: white;
+	width: 100%;
+	-webkit-print-color-adjust: exact;
+}
+
+
+</style>
+<script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+<script>
+	$(document).ready(function () {
+	//$(function () {
+//	$("#button").click(function () {
+			$("#top10").change( function (){
+//		$(".barChart").hide();	
+		var data = {
+			//query : "select Name, Area  from island where Area IS NOT NULL ORDER BY Area DESC LIMIT 10 ;"
+			  query : $("#top10").val()
+		};
+		
+		function riversChart(data) {
+			var margin = {top: 40, right: 20, bottom: 30, left: 40},
+		    //width = 960 - margin.left - margin.right,
+		    height = 500 - margin.top - margin.bottom;
+		   // width = 100-margin.left-margin.right;
+		   width = 750-margin.left;
+	//	var formatPercent = d3.format(".0%");
+
+		var x = d3.scale.ordinal()
+		    .rangeRoundBands([0, width], .1);
+
+		var y = d3.scale.linear()
+		    .range([height, 0]);
+
+		var xAxis = d3.svg.axis()
+		    .scale(x)
+		    .orient("bottom");
+
+		var yAxis = d3.svg.axis()
+		    .scale(y)
+		    .orient("left")
+		   // .tickFormat(formatPercent);
+
+		var tip = d3.tip()
+		  .attr('class', 'd3-tip')
+		  .offset([-10, 0])
+		  .html(function(d) {
+		    return "<strong>Length:</strong> <span style='color:red'>" + d.value + "</span>";
+		  })
+
+		var svg = d3.select(".riversChart").append("svg")
+		    .attr("width", width + margin.left + margin.right)
+    	    .attr("height", height + margin.top + margin.bottom)
+		  .append("g")
+		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		svg.call(tip);
+
+		//d3.json("data.json", function(error,data) {
+		  x.domain(data.map(function(d) { return d.name; }));
+		  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+		  svg.append("g")
+		      .attr("class", "x axis")
+		      .attr("transform", "translate(0," + height + ")")
+		      .call(xAxis);
+
+		  svg.append("g")
+		      .attr("class", "y axis")
+		      .call(yAxis)
+		    .append("text")
+		      .attr("transform", "rotate(-90)")
+		      .attr("y", 6)
+		      .attr("dy", ".71em")
+		      .style("text-anchor", "end")
+		      .text("Length x 100");
+
+		  svg.selectAll(".riversChart")
+		      .data(data)
+		    .enter().append("rect")
+		      .attr("class", "bar")
+		      .attr("x", function(d) { return x(d.name); })
+		      .attr("width", x.rangeBand())
+		      .attr("y", function(d) { return y(d.value); })
+		      .attr("height", function(d) { return height - y(d.value); })
+		      .on('mouseover', tip.show)
+		      .on('mouseout', tip.hide)
+
+		//});
+
+		
+		}
+		
+		function barChart(data,div) {
+			
+			var color = d3.scale
+					.ordinal()
+					.range(["green","bisque","red","violet","orange","brown","purple","magenta","cyan","coral" ]);
+
+			var x = d3.scale.linear().domain(
+					[ 0, 1000 ]).range(
+					[ 0, 1000 ]);
+			var height = 20;
+
+			
+
+			d3
+					.select(div)
+					.selectAll("div")
+					.data(data)
+					.enter()
+					.append("div")
+					.style("width", "1px")
+					.style("height",
+							height * 2 + "px")
+					.style("padding-top",
+							"0.1px")
+					.style("padding", "0.1px")	
+					.style("background-color",
+							"black")
+
+					.append("div")
+					.style({
+						stroke : "black",
+						"stroke-width" : "2px"
+					})
+					.style(
+							"height",
+							function(d) {
+								return height
+										+ "px";
+							})
+					.style("font-size", "12px")
+					.style("margin-top", "10px")
+					.style("text-align", "left")
+					.style("color","black")
+					.style("width",
+							function(d) {
+							 
+								 return (d.value/10)+ "px";
+							 
+							})
+					.style(
+							"background-color",
+							function(d, i) {
+								return color(i);
+							})
+					.text(function(d, i) {
+						return data[i].name;
+						//return data[i].label;
+					})
+					.append("p")
+					.style(
+							"margin-top",
+							function(d) { 
+								return -height
+										- 5
+										+ "px";	
+							})
+					.style(
+							"margin-left",
+							function(d,i) {
+										 return (data[i].value/10)+ "px";
+							})
+
+					.style("color", "black")
+					.text(function(d,i) {
+						return data[i].value
+					});
+		}
+		$.ajax({
+             type: "GET",
+             url: "Rivers",
+             data: data,
+             dataType : "json",
+             success : function(rdata) {
+				 console.log(data);
+            	 if ($("#top10").val() == "altituderivers") {
+				 	  barChart(rdata,".altituderivers");
+	            	  $(".altituderivers").show();
+
+            	 }   if ($("#top10").val() == "riversChart") {
+					  riversChart(rdata);
+					  $(".riversChart").show();
+            	  	} 
+            	  	
+            	  }
+			
+             });
+		});
+			
+	});
+	//});
+</script>
+</html>

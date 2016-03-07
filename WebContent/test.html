@@ -1,0 +1,130 @@
+
+<div class="circles"></div>
+<div class="barChart"></div>
+<style>
+.barChart div {
+	font: 10px sans-serif;
+	text-align: right;
+	padding: 4px;
+	margin: 1px;
+	color: black;
+	width: 50%;
+	-webkit-print-color-adjust: exact;
+}
+</style>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script
+	src="http://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.0/mustache.min.js"></script>
+<script type="text/javascript"
+	src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js"></script>
+<script>
+
+
+	$(document)
+			.ready(
+					function() {
+
+						funCircles();
+						barChart();
+						$(".circles").show();
+						$(".barChart").show();
+					
+						function barChart() {
+											var data = [ {
+												"label" : "You",
+												"value" : 0
+											}, {
+												"label" : " Recommended",
+												"value" : 60
+											}, {
+												"label" : "Peers",
+												"value" : 0
+											} ];
+											var color = d3.scale
+													.ordinal()
+													.range(
+															["yellow", "gold",
+																	"green" ]);
+
+											var x = d3.scale.linear().domain(
+													[ 0, 1000 ]).range(
+													[ 0, 1000 ]);
+											var height = 20;
+
+											
+
+											d3
+													.select(".barChart")
+													.selectAll("div")
+													.data(data)
+													.enter()
+													.append("div")
+													.style("width", "0px")
+													.style("height",
+															height *  1.5 + "px")
+													.style("padding-top",
+															"0.1px")
+													.style("padding", "0.1px")
+													.style("background-color",
+															"black")
+.style({
+														stroke : "black",
+														"stroke-width" : "2px"
+													})
+													.append("div")
+													.style({
+														stroke : "black",
+														"stroke-width" : "2px"
+													})
+													.style(
+															"height",
+															function(d) {
+																return height
+																		+ "px";
+															})
+													.style("font-size", "20px")
+													.style("margin-top", "10px")
+													.style("text-align", "left")
+													.style("width",
+															function(d) {
+																
+																return (d.value + 100)
+																		+ "px";
+															})
+													.style(
+															"background-color",
+															function(d, i) {
+															   
+																
+																return color(i);
+															})
+													.text(function(d, i) {
+														
+														return data[i].label;
+													})
+													.append("p")
+													.style(
+															"margin-top",
+															function(d) {
+																return -height
+																		- 5
+																		+ "px";
+															})
+													.style(
+															"margin-left",
+															function(d) {
+																return (d.value + 100)
+																		+ 10
+																		+ "px";
+															})
+
+													.style("color", "black")
+													.text(function(d) {
+														return d.value
+													});
+						}
+											
+					});
+</script>

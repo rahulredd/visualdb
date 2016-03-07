@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="project.css">
+</head>
+
+ <div id="options"> 
+  <select id="top10">
+  	  <option value="top10">Top 10</option>
+      <option value="top10cities">Top 10 most populated cities</option>
+      <option value="largestislands">Largest Islands</option>
+    </select>
+    <input type="button" value="Submit" id="button">
+ </div>
+<div class = "barChart"></div>
+<div class= "barChart1"></div>
+</body>
+<style>
+
+.barChart1 {
+	fill:steelblue;
+}
+
+.barChart div {
+	font: 10px sans-serif;
+	text-align: right;
+	padding: 2px;
+	margin: 1px;
+	color: white;
+	width: 100%;
+	-webkit-print-color-adjust: exact;
+}
+</style>
+<script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+
+<script>
+	$(document).ready(function () {
+	//$(function () {
+//	$("#button").click(function () {
+	
+			$("#top10").change( function (){
+		var data = [];
+		if ($("#top10").val() == "largestislands") {
+			$(".barChart1").hide();	
+			data = [{"name":"Greenland", "value":1000000}, {"name":"New Guinea", "value":786000}, {"name":"Borneo", "value":743122}, {"name":"Madagaskar", "value":587041}];
+			  $(".barChart").show();
+		} else  {
+			
+			$(".barChart").hide();	
+			  var pieVal = 0;
+			  data = [{"name":"Seoul", "value":100}, {"name":"Mumbai", "value":150}, {"name":"Karachi", "value":300}];
+			  var margin = {top: 40, right: 20, bottom: 30, left: 40},
+			    //width = 960 - margin.left - margin.right,
+			    height = 500 - margin.top - margin.bottom;
+			    width = 250-margin.left-margin.right;
+
+		//	var formatPercent = d3.format(".0%");
+
+			var x = d3.scale.ordinal()
+			    .rangeRoundBands([0, width], .1);
+
+			var y = d3.scale.linear()
+			    .range([height, 0]);
+
+			var xAxis = d3.svg.axis()
+			    .scale(x)
+			    .orient("bottom");
+
+			var yAxis = d3.svg.axis()
+			    .scale(y)
+			    .orient("left")
+			   // .tickFormat(formatPercent);
+
+			var tip = d3.tip()
+			  .attr('class', 'd3-tip')
+			  .offset([-10, 0])
+			  .html(function(d) {
+			    return "<strong>Length:</strong> <span style='color:red'>" + d.value + "</span>";
+			  })
+
+			var svg = d3.select(".barChart1").append("svg")
+			    .attr("width", width + margin.left + margin.right)
+			    .attr("height", height + margin.top + margin.bottom)
+			  .append("g")
+			    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			svg.call(tip);
+
+			//d3.json("data.json", function(error,data) {
+				console.log("map "+data[0].name);
+			  x.domain(data.map(function(d) { return d.name; }));
+			  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+			  svg.append("g")
+			      .attr("class", "x axis")
+			      .attr("transform", "translate(0," + height + ")")
+			      .call(xAxis);
+
+			  svg.append("g")
+			      .attr("class", "y axis")
+			      .call(yAxis)
+			    .append("text")
+			      .attr("transform", "rotate(-90)")
+			      .attr("y", 6)
+			      .attr("dy", ".71em")
+			      .style("text-anchor", "end")
+			      .text("Length");
+
+			  svg.selectAll(".barChart1")
+			      .data(data)
+			    .enter().append("rect")
+			      .attr("class", "bar")
+			      .attr("x", function(d) { return x(d.name); })
+			      .attr("width", x.rangeBand())
+			      .attr("y", function(d) { return y(d.value); })
+			      .attr("height", function(d) { return height - y(d.value); })
+			      .on('mouseover', tip.show)
+			      .on('mouseout', tip.hide)
+
+			//});
+
+			function type(d) {
+			  d.value = +d.value;
+			  return d;
+			}
+		}      
+         
+             	
+             });
+		});
+			
+	//});
+</script>
+</html>

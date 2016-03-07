@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+ - <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="project.css">
+</head>
+
+ <div id="options"> 
+ Top 10 <select id="top10">
+ 	  <option value="">Choose from the options</option>
+      <option value="largestarea">Largest Countries</option>
+      <option value="populated">Most Populated Countries</option>
+    </select>
+    <input type="button" value="Submit" id="button">
+ </div>
+<div class = "largestarea"></div>
+<div class = "populated"></div>
+</body>
+<style>
+
+.largestarea ,.populated {
+	fill:steelblue;
+}
+
+</style>
+<script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+<script>
+	$(document).ready(function () {
+		$("#top10").change( function (){
+		var data = {
+			//query : "select Name, Area  from island where Area IS NOT NULL ORDER BY Area DESC LIMIT 10 ;"
+			  query : $("#top10").val()
+		};
+		
+		function chart(data,div) {
+			var margin = {top: 40, right: 20, bottom: 30, left: 40},
+		    height = 500 - margin.top - margin.bottom;
+		   width = 750-margin.left;
+
+		var x = d3.scale.ordinal()
+		    .rangeRoundBands([0, width], .1);
+
+		var y = d3.scale.linear()
+		    .range([height, 0]);
+
+		var xAxis = d3.svg.axis()
+		    .scale(x)
+		    .orient("bottom");
+
+		var yAxis = d3.svg.axis()
+		    .scale(y)
+		    .orient("left")
+		   // .tickFormat(formatPercent);
+			console.log("Hello "+data[1].name);
+
+		var tip = d3.tip()
+		  .attr('class', 'd3-tip')
+		  .offset([-10, 0])
+		  .html(function(d) {
+		    return "<strong>Length:</strong> <span style='color:red'>" + d.value + "</span>";
+		  })
+
+		var svg = d3.select(div).append("svg")
+		    .attr("width", width + margin.left + 50)
+    	    .attr("height", height + margin.top + margin.bottom)
+		  .append("g")
+		    .attr("transform", "translate(" + 100 + "," + margin.top + ")");
+
+		svg.call(tip);
+
+		//d3.json("data.json", function(error,data) {
+			console.log("map "+data[0].name);
+		  x.domain(data.map(function(d) { return d.name; }));
+		  y.domain([0, d3.max(data, function(d) { return d.value/100; })]);
+
+		  svg.append("g")
+		      .attr("class", "x axis")
+		      .attr("transform", "translate(0," + height + ")")
+		      .call(xAxis);
+
+		  svg.append("g")
+		      .attr("class", "y axis")
+		      .call(yAxis)
+		    .append("text")
+		      .attr("transform", "rotate(-90)")
+		      .attr("y", 6)
+		      .attr("dy", ".71em")
+		      .style("text-anchor", "end")
+		      .text("Length x 100");
+
+		  svg.selectAll(div)
+		      .data(data)
+		    .enter().append("rect")
+		      .attr("class", "bar")
+		      .attr("x", function(d) { return x(d.name); })
+		      .attr("width", x.rangeBand())
+		      .attr("y", function(d) { return y(d.value/100); })
+		      .attr("height", function(d) { return height - y(d.value/100); })
+		      .on('mouseover', tip.show)
+		      .on('mouseout', tip.hide)
+		}
+		
+		function hideAll() {
+			$(".largestarea").hide();
+			$(".populated").hide();
+		}
+		$.ajax({
+             type: "GET",
+             url: "Country",
+             data: data,
+             dataType : "json",
+             success : function(rdata) {
+            	 if ($("#top10").val() == "largestarea") {
+            		 hideAll();	
+			   	 	chart(rdata,".largestarea");
+	            	 $(".largestarea").show();
+
+            	 }  if ($("#top10").val() == "populated") {
+            		 hideAll();
+            		 chart(rdata,".populated");
+                	 $(".populated").show();
+            	
+            	  }
+             }
+             });
+		});
+			
+	});
+	//});
+</script>
+</html>

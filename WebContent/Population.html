@@ -1,0 +1,257 @@
+<!--
+Query: select Name, Area from lake where Area IS NOT NULL ORDER BY Area desc  LIMIT 10;
+Select Option Name: 10 biggest lakes
+-->
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.bar {
+  fill: gold;
+}
+
+.bar:hover {
+  fill: red;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+.bar--positive {
+  fill: steelblue;
+}
+
+.bar--negative {
+  fill: darkorange;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+</style>
+<link rel="stylesheet" href="project.css">
+<body>
+<div id="options"> 
+ Top 10 <select id="top10">
+ 	  <option value="">Choose from the options</option>
+      <option value="populationgrowth">Population Growth</option>
+      <option value="leastpopulated">Least Populated Countries</option>
+      
+    </select>
+ </div>
+<div class = "populationgrowth"></div>
+<div class = "leastpopulated"></div>
+<script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script>
+$(document).ready(function () {
+	$("#top10").change( function (){
+	var data = {
+		//query : "select Name, Area  from island where Area IS NOT NULL ORDER BY Area DESC LIMIT 10 ;"
+		  query : $("#top10").val()
+	};
+function popChart1(data) {
+	var margin = {top: 40, right: 20, bottom: 30, left: 60},
+    width = 900 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+	
+var formatPercent = d3.format(".0%");
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .150);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+//    .tickFormat(formatPercent);
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>Population:</strong> <span style='color:red'>" + d.value + "</span>";
+  })
+
+var svg = d3.select(".leastpopulated").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", 600)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.call(tip);
+	
+  x.domain(data.map(function(d) { return d.name; }));
+  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+  .selectAll("text")
+  .attr("y", 0)
+  .attr("x", 9)
+  .attr("dy", ".35em")
+  .attr("transform", "rotate(90)")
+  .style("text-anchor", "start");
+  //.selectAll("text")  
+  //.style("text-anchor", "start")
+  //.attr("transform", "rotate(-90)" );
+  
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Population");
+
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.name); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); })
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide)
+}
+function popChart(data) {
+	var margin = {top: 20, right: 30, bottom: 40, left: 30},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.scale.linear()
+    .range([0, width]);
+
+var y = d3.scale.ordinal()
+    .rangeRoundBands([0, height], 0.1);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickSize(0)
+    .tickPadding(6);
+
+var svg = d3.select(".populationgrowth").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  x.domain(d3.extent(data, function(d) { return d.value; })).nice();
+  y.domain(data.map(function(d) { return d.name; }));
+
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", function(d) { return "bar bar--" + (d.value < 0 ? "negative" : "positive"); })
+      .attr("x", function(d) { return x(Math.min(0, d.value)); })
+      .attr("y", function(d) { return y(d.name); })
+      .attr("width", function(d) { return Math.abs(x(d.value) - x(0)); })
+      .attr("height", y.rangeBand());
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + x(0) + ",0)")
+      .call(yAxis);
+}
+
+
+
+function hideAll() {
+	$(".populationgrowth").hide();
+	$(".leastpopulated").hide();
+ }
+$.ajax({
+    type: "GET",
+    url: "Country",
+    data: data,
+    dataType : "json",
+    success : function(rdata) {
+   	 
+		 console.log(data);
+   	 if ($("#top10").val() == "populationgrowth") {
+   		 hideAll();	
+   		 $(".leastpopulated").hide();
+   		 popChart(rdata);
+       	 $(".populationgrowth").show();
+
+   	 }  if ($("#top10").val() == "leastpopulated") {
+   		 hideAll();
+   		 $(".populationgrowth").hide();
+   		 popChart1(rdata);
+       	 $(".leastpopulated").show();
+   	
+   	  }
+    }
+});
+	});
+});
+</script>

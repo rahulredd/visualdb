@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+ - <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="project.css">
+</head>
+
+ <div id="options"> 
+ Top 10 <select id="top10">
+ 	  <option value="">Choose from the options</option>
+      <option value="biggestarea">Largest Islands</option>
+      <option value="height">Largest Islands by Altitude</option>
+      <option value="areaheight">Islands Areas and Height</option>
+    </select>
+    <input type="button" value="Submit" id="button">
+ </div>
+<div class = "biggestarea"></div>
+<div class = "height"></div>
+<div class = "areaheight"></div>
+</body>
+<style>
+
+.y.axisRight text {
+    fill: orange;
+}
+.y.axisLeft text {
+    fill: steelblue;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.bar1 {
+  fill: steelblue;
+}
+.bar2 {
+  fill: orange;
+}
+.x.axis path {
+  display: none;
+}
+.biggestarea div,.height div {
+	font: 10px sans-serif;
+	text-align: right;
+	padding: 20px;
+	margin: 1px;
+	color: white;
+	width: 100%;
+	-webkit-print-color-adjust: exact;
+}
+.riversChart {
+	fill:steelblue;
+}
+
+</style>
+<script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+<script>
+	$(document).ready(function () {
+		$("#top10").change( function (){
+		var data = {
+			//query : "select Name, Area  from island where Area IS NOT NULL ORDER BY Area DESC LIMIT 10 ;"
+			  query : $("#top10").val()
+		};
+		
+		
+		
+		
+		function barChart(data,div) {
+			console.log(data[0].name+ " " +data[1].name);
+			
+			var color = d3.scale
+					.ordinal()
+					.range(["green","bisque","red","violet","orange","brown","purple","magenta","cyan","coral" ]);
+
+			var x = d3.scale.linear().domain(
+					[ 0, 1000 ]).range(
+					[ 0, 1000 ]);
+			var height = 20;
+
+			
+
+			d3
+					.select(div)
+					.selectAll("div")
+					.data(data)
+					.enter()
+					.append("div")
+					.style("width", "1px")
+					.style("height",
+							height * 2 + "px")
+					.style("padding-top",
+							"0.1px")
+					.style("padding", "0.1px")	
+					.style("background-color",
+							"black")
+
+					.append("div")
+					.style({
+						stroke : "black",
+						"stroke-width" : "2px"
+					})
+					.style(
+							"height",
+							function(d) {
+								return height
+										+ "px";
+							})
+					.style("font-size", "12px")
+					.style("margin-top", "10px")
+					.style("text-align", "left")
+					.style("color","black")
+					.style("width",
+							function(d) {
+						 if ($("#top10").val() == "biggestarea" ) {
+								return (d.value/1000)+ "px";				
+							 } else {
+								 return (d.value/10)+ "px";
+							 }
+							})
+					.style(
+							"background-color",
+							function(d, i) {
+								return color(i);
+							})
+					.text(function(d, i) {
+						return data[i].name;
+					})
+					.append("p")
+					.style(
+							"margin-top",
+							function(d) { 
+								return -height
+										- 5
+										+ "px";	
+							})
+					.style(
+							"margin-left",
+							function(d,i) {
+								 if ($("#top10").val() == "biggestarea" ) {
+										return (data[i].value/1000)+ "px";				
+									 } else {
+										 return (data[i].value/10)+ "px";
+									 }
+							})
+
+					.style("color", "black")
+					.text(function(d,i) {
+						return data[i].value
+					});
+		}
+		function areaHeight(data) {
+
+			var margin = {top: 150, right: 130, bottom: 80, left: 80},
+			    width = 1000 - margin.left - margin.right,
+			    height = 600 - margin.top - margin.bottom;
+			var x = d3.scale.ordinal()
+			    .rangeRoundBands([0, width], .18);
+			var y0 = d3.scale.linear().domain([300, 1100]).range([height, 0]),
+			y1 = d3.scale.linear().domain([1000, 5000]).range([height, 0]);
+			var xAxis = d3.svg.axis()
+			    .scale(x)
+			    .orient("bottom");
+			// create left yAxis
+			var yAxisLeft = d3.svg.axis().scale(y0).ticks(8).orient("left");
+			// create right yAxis
+			var yAxisRight = d3.svg.axis().scale(y1).ticks(8).orient("right");
+			var svg = d3.select(".areaheight").append("svg")
+			    .attr("width", width + margin.left + margin.right)
+			    .attr("height", 800)
+			  .append("g")
+			    .attr("class", "graph")
+			    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			x.domain(data.map(function(d) { return d.Country; }));
+			  y0.domain([0, d3.max(data, function(d) { return d.Area; })+10000]);
+			  
+			  svg.append("g")
+			      .attr("class", "x axis")
+			      .attr("transform", "translate(0," + height + ")")
+			      .call(xAxis)
+			  .selectAll("text")
+			    .attr("y", 0)
+			    .attr("x", 9)
+			    .attr("dy", ".35em")
+			    .attr("transform", "rotate(90)")
+			    .style("text-anchor", "start");
+			  
+			  svg.append("g")
+			      .attr("class", "y axis axisLeft")
+			      .attr("transform", "translate(0,0)")
+			      .call(yAxisLeft)
+			    .append("text")
+			      .attr("y", 6)
+			      .attr("dy", "-2em")
+			      .style("text-anchor", "end")
+			      .style("text-anchor", "end")
+			      .text("Area");
+			    
+			  svg.append("g")
+			      .attr("class", "y axis axisRight")
+			      .attr("transform", "translate(" + (width) + ",0)")
+			      .call(yAxisRight)
+			    .append("text")
+			      .attr("y", 6)
+			      .attr("dy", "-2em")
+			      .attr("dx", "2em")
+			      .style("text-anchor", "end")
+			      .text("Height");
+			  bars = svg.selectAll(".bar").data(data).enter();
+			  bars.append("rect")
+			      .attr("class", "bar1")
+			      .attr("x", function(d) { return x(d.Country); })
+			      .attr("width", x.rangeBand()/2)
+			      .attr("y", function(d) { return y0(d.Area); })
+			      .attr("height", function(d,i,j) { return height - y0(d.Area); }); 
+			  bars.append("rect")
+			      .attr("class", "bar2")
+			      .attr("x", function(d) { return x(d.Country) + x.rangeBand()/2; })
+			      .attr("width", x.rangeBand() / 2)
+			      .attr("y", function(d) { return y1(d.Height); })
+			      .attr("height", function(d,i,j) { return height - y1(d.Height); }); 
+			}
+		
+		function hideAll() {
+			$(".biggestarea").hide();
+			$(".height").hide();
+			$(".areaheight").hide();
+		}
+		$.ajax({
+             type: "GET",
+             url: "Island",
+             data: data,
+             dataType : "json",
+             success : function(rdata) {
+            	 
+            
+				 console.log(data);
+            	 if ($("#top10").val() == "biggestarea") {
+            		 hideAll();	
+				 	barChart(rdata,".biggestarea");
+	            	 $(".biggestarea").show();
+
+            	 }  if ($("#top10").val() == "height") {
+            		 hideAll();
+            		 barChart(rdata,".height");
+                	 $(".height").show();
+            	
+            	  } if ($("#top10").val() == "areaheight") {
+            		 hideAll();
+            		 areaHeight(rdata);
+                	 $(".areaheight").show();
+            	  }
+                }
+             });
+		});
+			
+	});
+	//});
+</script>
+</html>
